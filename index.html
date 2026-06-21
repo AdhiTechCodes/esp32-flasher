@@ -5,18 +5,7 @@
 <title>ESP32 Firmware Installer</title>
 
 <script type="module"
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-  collection,
-  addDoc
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js">
 </script>
 
 <style>
@@ -34,15 +23,15 @@ body{
     box-shadow:0 0 10px #ccc;
 }
 
-#success{
-    display:none;
-    margin-top:20px;
-}
-
 button{
     padding:10px 20px;
     font-size:16px;
     cursor:pointer;
+}
+
+#status{
+    margin-top:20px;
+    font-weight:bold;
 }
 </style>
 </head>
@@ -62,20 +51,7 @@ id="installer"
 manifest="manifest.json">
 </esp-web-install-button>
 
-<div id="success">
-
-<h2>✅ Installation Complete</h2>
-
-<h3>
-Installation Number:
-<span id="installNo"></span>
-</h3>
-
-<button id="consoleBtn">
-Logs & Console
-</button>
-
-</div>
+<div id="status"></div>
 
 </div>
 
@@ -87,8 +63,7 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
 getFirestore,
 doc,
-getDoc,
-updateDoc
+getDoc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -98,35 +73,27 @@ const firebaseConfig = {
   projectId: "esp32-flasher-e402f",
   storageBucket: "esp32-flasher-e402f.firebasestorage.app",
   messagingSenderId: "835141727928",
-  appId: "1:835141727928:web:d1c0a557c7611c4002e64d"
+  appId: "1:835141727928:web:d1c0a557c7611c4002e64d",
+  measurementId: "G-FP2HTH72EG"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const counterRef = doc(db,"stats","counter");
+async function loadCount() {
 
-async function loadCount(){
-    const snap = await getDoc(counterRef);
+    const snap =
+    await getDoc(doc(db,"stats","counter"));
 
-    if(snap.exists()){
+    if(snap.exists()) {
+
         document.getElementById("count").innerHTML =
         snap.data().count;
+
     }
 }
 
 loadCount();
-
-/*
-ESP Web Tools currently handles completion internally.
-You can manually update the counter using a button
-or extend this later if you implement a serial
-confirmation message from the ESP32.
-*/
-
-document.getElementById("consoleBtn").onclick=()=>{
-    alert("Use the ESP Web Tools Logs & Console option.");
-};
 
 </script>
 
