@@ -1,40 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <title>ESP32 Admin Panel</title>
 
 <style>
 body{
-    font-family:Arial;
-    max-width:500px;
+    font-family:Arial,sans-serif;
+    max-width:600px;
     margin:auto;
     padding:20px;
 }
+
 input{
     width:100%;
     padding:10px;
-    margin:5px 0;
+    margin:10px 0;
+    font-size:16px;
 }
+
 button{
-    padding:10px;
-    margin-top:10px;
+    padding:10px 20px;
+    font-size:16px;
+    cursor:pointer;
 }
+
 #panel{
     display:none;
 }
 </style>
-
 </head>
+
 <body>
 
-<h2>ESP32 Admin Login</h2>
+<h1>ESP32 Admin Login</h1>
 
 <div id="login">
 
-<input id="email" placeholder="Email">
+<input
+id="email"
+type="email"
+placeholder="Email">
 
-<input id="password"
+<input
+id="password"
 type="password"
 placeholder="Password">
 
@@ -46,11 +55,13 @@ Login
 
 <div id="panel">
 
-<h3>Current Install Count:
+<h2>
+Current Install Count:
 <span id="count">0</span>
-</h3>
+</h2>
 
-<input id="newCount"
+<input
+id="newCount"
 type="number"
 placeholder="New Count">
 
@@ -92,51 +103,57 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-document.getElementById("loginBtn").onclick =
-async ()=>{
+const loginBtn = document.getElementById("loginBtn");
 
-try{
+loginBtn.addEventListener("click", async () => {
 
-await signInWithEmailAndPassword(
-auth,
-document.getElementById("email").value,
-document.getElementById("password").value
-);
+    try {
 
-document.getElementById("login").style.display="none";
-document.getElementById("panel").style.display="block";
+        await signInWithEmailAndPassword(
+            auth,
+            document.getElementById("email").value,
+            document.getElementById("password").value
+        );
 
-const snap =
-await getDoc(doc(db,"stats","counter"));
+        document.getElementById("login").style.display = "none";
+        document.getElementById("panel").style.display = "block";
 
-document.getElementById("count").innerHTML =
-snap.data().count;
+        const snap = await getDoc(
+            doc(db,"stats","counter")
+        );
 
-}
-catch(err){
-alert(err.message);
-}
+        if(snap.exists()){
+            document.getElementById("count").innerText =
+            snap.data().count;
+        }
 
-};
+    } catch(err) {
 
-document.getElementById("updateBtn").onclick =
-async ()=>{
+        alert(err.message);
 
-let newCount =
-Number(document.getElementById("newCount").value);
+    }
 
-await updateDoc(
-doc(db,"stats","counter"),
-{
-count:newCount
 });
 
-document.getElementById("count").innerHTML =
-newCount;
+document.getElementById("updateBtn")
+.addEventListener("click", async ()=>{
 
-alert("Count Updated");
+    const value =
+    Number(document.getElementById("newCount").value);
 
-};
+    await updateDoc(
+        doc(db,"stats","counter"),
+        {
+            count:value
+        }
+    );
+
+    document.getElementById("count").innerText =
+    value;
+
+    alert("Count Updated");
+
+});
 
 </script>
 
