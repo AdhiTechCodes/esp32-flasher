@@ -13,25 +13,33 @@ body{
     font-family: Arial, sans-serif;
     text-align:center;
     margin-top:50px;
+    background:#f5f5f5;
 }
 
 .card{
     width:500px;
     margin:auto;
     padding:20px;
+    background:white;
     border-radius:10px;
-    box-shadow:0 0 10px #ccc;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
 
 button{
     padding:10px 20px;
     font-size:16px;
     cursor:pointer;
+    margin-top:15px;
+}
+
+#doneBtn{
+    display:none;
 }
 
 #status{
     margin-top:20px;
     font-weight:bold;
+    color:green;
 }
 </style>
 </head>
@@ -42,7 +50,8 @@ button{
 
 <h1>ESP32 Firmware Installer</h1>
 
-<h3>Total Installations:
+<h3>
+Total Installations:
 <span id="count">0</span>
 </h3>
 
@@ -50,6 +59,12 @@ button{
 id="installer"
 manifest="manifest.json">
 </esp-web-install-button>
+
+<br>
+
+<button id="doneBtn">
+Done
+</button>
 
 <div id="status"></div>
 
@@ -61,9 +76,12 @@ import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
-getFirestore,
-doc,
-getDoc
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  addDoc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -80,20 +98,81 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function loadCount() {
+const counterRef = doc(db,"stats","counter");
 
-    const snap =
-    await getDoc(doc(db,"stats","counter"));
+async function loadCount(){
 
-    if(snap.exists()) {
+    const snap = await getDoc(counterRef);
+
+    if(snap.exists()){
 
         document.getElementById("count").innerHTML =
         snap.data().count;
 
     }
+
 }
 
 loadCount();
+
+document.getElementById("doneBtn")
+.addEventListener("click", async ()=>{
+
+    const snap = await getDoc(counterRef);
+
+    let currentCount = 0;
+
+    if(snap.exists()){
+
+        currentCount =
+        snap.data().count || 0;
+
+    }
+
+    const newCount = currentCount + 1;
+
+    await updateDoc(counterRef,{
+        count:newCount
+    });
+
+    await addDoc(
+        collection(db,"installs"),
+        {
+            timestamp:new Date().toISOString()
+        }
+    );
+
+    await loadCount();
+
+    document.getElementById("status").innerHTML =
+    "✅ Installation #" +
+    newCount +
+    " Saved Successfully";
+
+    document.getElementById("doneBtn")
+    .style.display="none";
+
+});
+
+const installer =
+document.getElementById("installer");
+
+/*
+Since ESP Web Tools doesn't provide a reliable
+success callback in the default component,
+we show Done button after flashing page is used.
+*/
+
+installer.addEventListener("click", ()=>{
+
+    setTimeout(()=>{
+
+        document.getElementById("doneBtn")
+        .style.display="inline-block";
+
+    },15000);
+
+});
 
 </script>
 
