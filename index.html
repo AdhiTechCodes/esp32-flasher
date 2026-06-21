@@ -5,7 +5,18 @@
 <title>ESP32 Firmware Installer</title>
 
 <script type="module"
-src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js">
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  addDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 </script>
 
 <style>
