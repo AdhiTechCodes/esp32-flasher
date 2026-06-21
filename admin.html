@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ESP32 Admin Panel</title>
+
+<style>
+body{
+    font-family:Arial;
+    max-width:500px;
+    margin:auto;
+    padding:20px;
+}
+input{
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+}
+button{
+    padding:10px;
+    margin-top:10px;
+}
+#panel{
+    display:none;
+}
+</style>
+
+</head>
+<body>
+
+<h2>ESP32 Admin Login</h2>
+
+<div id="login">
+
+<input id="email" placeholder="Email">
+
+<input id="password"
+type="password"
+placeholder="Password">
+
+<button id="loginBtn">
+Login
+</button>
+
+</div>
+
+<div id="panel">
+
+<h3>Current Install Count:
+<span id="count">0</span>
+</h3>
+
+<input id="newCount"
+type="number"
+placeholder="New Count">
+
+<button id="updateBtn">
+Update Count
+</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getAuth,
+signInWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+getDoc,
+updateDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBI9PYPpqAd_5uX5b3ICQ6fLgBaJ_8mDLVc",
+  authDomain: "esp32-flasher-e402f.firebaseapp.com",
+  projectId: "esp32-flasher-e402f",
+  storageBucket: "esp32-flasher-e402f.firebasestorage.app",
+  messagingSenderId: "835141727928",
+  appId: "1:835141727928:web:d1c0a557c7611c4002e64d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+document.getElementById("loginBtn").onclick =
+async ()=>{
+
+try{
+
+await signInWithEmailAndPassword(
+auth,
+document.getElementById("email").value,
+document.getElementById("password").value
+);
+
+document.getElementById("login").style.display="none";
+document.getElementById("panel").style.display="block";
+
+const snap =
+await getDoc(doc(db,"stats","counter"));
+
+document.getElementById("count").innerHTML =
+snap.data().count;
+
+}
+catch(err){
+alert(err.message);
+}
+
+};
+
+document.getElementById("updateBtn").onclick =
+async ()=>{
+
+let newCount =
+Number(document.getElementById("newCount").value);
+
+await updateDoc(
+doc(db,"stats","counter"),
+{
+count:newCount
+});
+
+document.getElementById("count").innerHTML =
+newCount;
+
+alert("Count Updated");
+
+};
+
+</script>
+
+</body>
+</html>
